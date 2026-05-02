@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Врачи и отзывы</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Справочник врачей</h1>
+      <p>Добавляйте врачей и отзывы, чтобы выбрать того, кто вам подходит.</p>
+    </header>
+
+    <section class="panel">
+      <div class="panel-item">
+        <h2>Добавить врача</h2>
+        <form id="doctor-form">
+          <label>Имя врача
+            <input type="text" id="doctor-name" placeholder="ФИО врача" required>
+          </label>
+          <label>Специальность
+            <input type="text" id="doctor-specialty" placeholder="Специальность" required>
+          </label>
+          <label>Клиника / место приема
+            <input type="text" id="doctor-clinic" placeholder="Клиника или адрес" required>
+          </label>
+          <label>Фото врача
+            <input type="file" id="doctor-photo" accept="image/*">
+          </label>
+          <button type="submit">Создать врача</button>
+        </form>
+      </div>
+
+      <div class="panel-item">
+        <h2>Добавить отзыв</h2>
+        <form id="review-form">
+          <label>Выберите врача
+            <select id="review-doctor" required>
+              <option value="">-- Выберите врача --</option>
+            </select>
+          </label>
+          <label>Оценка
+            <select id="review-rating" required>
+              <option value="5">5 — Отлично</option>
+              <option value="4">4 — Хорошо</option>
+              <option value="3">3 — Удовлетворительно</option>
+              <option value="2">2 — Плохо</option>
+              <option value="1">1 — Очень плохо</option>
+            </select>
+          </label>
+          <label>Отзыв
+            <textarea id="review-text" rows="4" placeholder="Ваш отзыв" required></textarea>
+          </label>
+          <label>Фото к отзыву
+            <input type="file" id="review-photo" accept="image/*">
+          </label>
+          <label>Ответ врача / клиники
+            <textarea id="review-response" rows="3" placeholder="Ответ врача или клиники (необязательно)"></textarea>
+          </label>
+          <button type="submit">Добавить отзыв</button>
+        </form>
+      </div>
+      <div class="panel-item">
+        <h2>Редактировать отзыв</h2>
+        <form id="edit-review-form">
+          <label>Выберите врача
+            <select id="edit-review-doctor">
+              <option value="">-- Выберите врача --</option>
+            </select>
+          </label>
+          <label>Выберите отзыв
+            <select id="edit-review-item" disabled>
+              <option value="">-- Выберите отзыв --</option>
+            </select>
+          </label>
+          <label>Оценка
+            <select id="edit-review-rating" required>
+              <option value="5">5 — Отлично</option>
+              <option value="4">4 — Хорошо</option>
+              <option value="3">3 — Удовлетворительно</option>
+              <option value="2">2 — Плохо</option>
+              <option value="1">1 — Очень плохо</option>
+            </select>
+          </label>
+          <label>Текст отзыва
+            <textarea id="edit-review-text" rows="4" placeholder="Ваш отзыв" required></textarea>
+          </label>
+          <label>Фото отзыва
+            <input type="file" id="edit-review-photo" accept="image/*">
+          </label>
+          <label>Ответ врача / клиники
+            <textarea id="edit-review-response" rows="3" placeholder="Ответ врача или клиники"></textarea>
+          </label>
+          <button type="submit">Сохранить изменения</button>
+          <button type="button" id="edit-review-delete">Удалить отзыв</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="search-bar">
+      <label>Поиск врача или специальности
+        <input type="search" id="search-input" placeholder="Имя врача, специальность, клиника">
+      </label>
+      <label>Фильтр отзывов
+        <select id="review-filter">
+          <option value="all">Все отзывы</option>
+          <option value="good">Хорошие отзывы (4–5)</option>
+          <option value="medium">Средние отзывы (3)</option>
+          <option value="bad">Плохие отзывы (1–2)</option>
+        </select>
+      </label>
+    </section>
+
+    <section>
+      <h2>Врачи и отзывы</h2>
+      <div id="doctor-list" class="doctor-list"></div>
+    </section>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
