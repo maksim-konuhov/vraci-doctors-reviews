@@ -91,11 +91,110 @@ button:hover {
 }
 
 .search-bar {
-  margin-bottom: 24px;
+  margin-bottom: 18px;
+  position: relative;
 }
 
 #search-input {
   margin-top: 8px;
+}
+
+.search-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  right: 0;
+  max-height: 320px;
+  overflow-y: auto;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 16px;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+  z-index: 10;
+  display: none;
+}
+
+.search-dropdown.active {
+  display: block;
+}
+
+.search-suggestion {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+}
+
+.search-suggestion:hover {
+  background: #f3f4f6;
+}
+
+.suggestion-photo {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  object-fit: cover;
+  background: #e5e7eb;
+}
+
+.suggestion-content {
+  flex: 1;
+}
+
+.suggestion-title {
+  margin: 0 0 4px;
+  font-weight: 700;
+}
+
+.suggestion-meta {
+  margin: 0;
+  color: #475569;
+  font-size: 0.94rem;
+}
+
+.suggestion-badge {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #3730a3;
+  font-size: 0.82rem;
+}
+
+.data-transfer {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.data-transfer-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.data-transfer textarea {
+  width: 100%;
+  margin-top: 8px;
+  min-height: 120px;
+}
+
+.data-transfer button {
+  border: none;
+  border-radius: 999px;
+  padding: 12px 18px;
+  background: #4338ca;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.data-transfer button:hover {
+  background: #3730a3;
 }
 
 .doctor-list {

@@ -2,11 +2,15 @@ const doctorForm = document.getElementById('doctor-form');
 const reviewForm = document.getElementById('review-form');
 const doctorList = document.getElementById('doctor-list');
 const searchInput = document.getElementById('search-input');
+const searchDropdown = document.getElementById('search-dropdown');
 const reviewFilterSelect = document.getElementById('review-filter');
 const reviewDoctorSelect = document.getElementById('review-doctor');
 const doctorPhotoInput = document.getElementById('doctor-photo');
 const reviewPhotoInput = document.getElementById('review-photo');
 const reviewResponseInput = document.getElementById('review-response');
+const exportDataButton = document.getElementById('export-data');
+const importDataTextarea = document.getElementById('import-data');
+const importDataButton = document.getElementById('import-data-button');
 const editReviewForm = document.getElementById('edit-review-form');
 const editReviewDoctorSelect = document.getElementById('edit-review-doctor');
 const editReviewItemSelect = document.getElementById('edit-review-item');
@@ -97,6 +101,78 @@ function getFilteredReviews(doctor, filterType) {
     return doctor.reviews.filter(review => review.rating <= 2);
   }
   return doctor.reviews;
+}
+
+function getSearchResults(query) {
+  const normalized = query.trim().toLowerCase();
+  return doctors.filter(doctor => {
+    return [doctor.name, doctor.specialty, doctor.clinic]
+      .some(value => value.toLowerCase().includes(normalized));
+  });
+}
+
+function renderSearchSuggestions(query) {
+  const matches = query.trim().length === 0 ? doctors : getSearchResults(query);
+  searchDropdown.innerHTML = '';
+  if (!matches.length) {
+    searchDropdown.innerHTML = '<div class="search-suggestion"><span>Врачи не найдены.</span></div>';
+    searchDropdown.classList.add('active');
+    return;
+  }
+
+  matches.forEach((doctor, index) => {
+    const average = calculateAverage(doctor);
+    const suggestion = document.createElement('div');
+    suggestion.className = 'search-suggestion';
+    suggestion.innerHTML = `
+      ${doctor.photo ? `<img class="suggestion-photo" src="${doctor.photo}" alt="Фото ${escapeHtml(doctor.name)}">` : '<div class="suggestion-photo"></div>'}
+      <div class="suggestion-content">
+        <p class="suggestion-title">${escapeHtml(doctor.name)}</p>
+        <p class="suggestion-meta">${escapeHtml(doctor.specialty)} • ${escapeHtml(doctor.clinic)}</p>
+        <span class="suggestion-badge">Рейтинг ${formatRating(average)}</span>
+      </div>
+    `;
+    suggestion.addEventListener('click', () => {
+      searchInput.value = doctor.name;
+      renderDoctors(doctor.name, reviewFilterSelect.value);
+      searchDropdown.classList.remove('active');
+    });
+    searchDropdown.appendChild(suggestion);
+  });
+  searchDropdown.classList.add('active');
+}
+
+function hideSearchSuggestions() {
+  searchDropdown.classList.remove('active');
+}
+
+function exportData() {
+  const data = JSON.stringify(doctors, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'doctor_reviews_data.json';
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+function importData() {
+  try {
+    const parsed = JSON.parse(importDataTextarea.value);
+    if (!Array.isArray(parsed)) {
+      alert('Ожидается массив врачей в JSON.');
+      return;
+    }
+    doctors = parsed;
+    saveData();
+    updateDoctorSelect();
+    renderDoctors(searchInput.value, reviewFilterSelect.value);
+    importDataTextarea.value = '';
+    alert('Данные успешно импортированы.');
+  } catch (error) {
+    alert('Ошибка при импорте данных: неверный JSON.');
+  }
 }
 
 function populateReviewOptions(doctorIndex) {
@@ -206,7 +282,7 @@ function renderDoctors(filter = '', reviewFilter = 'all') {
         doctors[index].photo = photo;
         saveData();
         updateDoctorSelect();
-        renderDoctors(searchInput.value);
+        renderDoctors(searchInput.value, reviewFilterSelect.value);
       };
       fileInput.click();
     });
@@ -331,7 +407,19 @@ reviewFilterSelect.addEventListener('change', () => {
 
 searchInput.addEventListener('input', () => {
   renderDoctors(searchInput.value, reviewFilterSelect.value);
+  renderSearchSuggestions(searchInput.value);
 });
+
+searchInput.addEventListener('focus', () => {
+  renderSearchSuggestions(searchInput.value);
+});
+
+searchInput.addEventListener('blur', () => {
+  setTimeout(hideSearchSuggestions, 200);
+});
+
+exportDataButton.addEventListener('click', exportData);
+importDataButton.addEventListener('click', importData);
 
 loadData();
 updateDoctorSelect();
