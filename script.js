@@ -48,6 +48,11 @@ function readImageFile(file) {
   });
 }
 
+function readImageFiles(fileList) {
+  const files = Array.from(fileList || []);
+  return Promise.all(files.map(file => readImageFile(file))).then(results => results.filter(Boolean));
+}
+
 function updateDoctorSelect() {
   reviewDoctorSelect.innerHTML = '<option value="">-- Выберите врача --</option>';
   doctors.forEach((doctor, index) => {
@@ -173,7 +178,14 @@ function renderDoctors(filter = '', reviewFilter = 'all') {
               <li class="review-item">
                 <strong>Оценка ${review.rating} — ${new Date(review.date).toLocaleDateString('ru-RU')}</strong>
                 <p>${escapeHtml(review.text)}</p>
-                ${review.photo ? `<img class="review-photo" src="${review.photo}" alt="Фото отзыва">` : ''}
+                ${(() => {
+                  const reviewPhotos = Array.isArray(review.photos)
+                    ? review.photos
+                    : review.photo
+                      ? [review.photo]
+                      : [];
+                  return reviewPhotos.map(photo => `<img class="review-photo" src="${photo}" alt="Фото отзыва">`).join('');
+                })()}
                 ${review.response ? `<div class="review-response"><strong>Ответ врача / клиники:</strong><p>${escapeHtml(review.response)}</p></div>` : ''}
               </li>
             `).join('')
@@ -238,7 +250,7 @@ doctorForm.addEventListener('submit', async event => {
 
   saveData();
   updateDoctorSelect();
-  renderDoctors(searchInput.value);
+  renderDoctors(searchInput.value, reviewFilterSelect.value);
   doctorForm.reset();
 });
 
@@ -248,7 +260,7 @@ reviewForm.addEventListener('submit', async event => {
   const rating = Number(document.getElementById('review-rating').value);
   const text = document.getElementById('review-text').value.trim();
   const response = reviewResponseInput.value.trim();
-  const photo = await readImageFile(reviewPhotoInput.files[0]);
+  const photos = await readImageFiles(reviewPhotoInput.files);
 
   if (Number.isNaN(doctorIndex) || doctorIndex < 0 || !text) return;
 
@@ -256,12 +268,12 @@ reviewForm.addEventListener('submit', async event => {
     rating,
     text,
     date: new Date().toISOString(),
-    photo,
+    photos,
     response
   });
 
   saveData();
-  renderDoctors(searchInput.value);
+  renderDoctors(searchInput.value, reviewFilterSelect.value);
   reviewForm.reset();
 });
 
@@ -291,7 +303,7 @@ editReviewForm.addEventListener('submit', async event => {
   const rating = Number(editReviewRatingSelect.value);
   const text = editReviewText.value.trim();
   const response = editReviewResponseInput.value.trim();
-  const photo = await readImageFile(editReviewPhotoInput.files[0]);
+  const newPhotos = await readImageFiles(editReviewPhotoInput.files);
 
   if (!text) return;
 
@@ -299,17 +311,14 @@ editReviewForm.addEventListener('submit', async event => {
   review.rating = rating;
   review.text = text;
   review.response = response;
-  if (photo) review.photo = photo;
+  if (!Array.isArray(review.photos)) {
+    review.photos = review.photo ? [review.photo] : [];
+    delete review.photo;
+  }
+  if (newPhotos.length) {
+    review.photos = [...review.photos, ...newPhotos];
+  }
 
-  saveData();
-  renderDoctors(searchInput.value);
-  updateEditReviewDoctorSelect();
-  editReviewForm.reset();
-});
-
-editReviewDeleteButton.addEventListener('click', () => {
-  if (editingDoctorIndex === null || editingReviewIndex === null) return;
-  doctors[editingDoctorIndex].reviews.splice(editingReviewIndex, 1);
   saveData();
   renderDoctors(searchInput.value, reviewFilterSelect.value);
   updateEditReviewDoctorSelect();
@@ -326,4 +335,4 @@ searchInput.addEventListener('input', () => {
 
 loadData();
 updateDoctorSelect();
-renderDoctors();
+renderDoctors(searchInput.value, reviewFilterSelect.value);
